@@ -12,5 +12,13 @@
       <ion-title size="large">頁面功能測試</ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-button expand="block" (click)="onClick()">{{ feature }} 功能測試</ion-button>
+  <ion-button expand="block" (click)="onClickGetCurrentPosition()">取得地理資訊</ion-button>
+  <ion-button expand="block" (click)="onClickWatch()">開始即時更新地理資訊</ion-button>
+  <ion-button expand="block" (click)="onClickUnwatch()">停止即時更新地理資訊</ion-button>
+  <ion-list>
+    <ion-item *ngFor="let geoInfo of geoInfoMap | keyvalue">
+      <ion-label>{{ geoInfo.key }}</ion-label>
+      <ion-note slot="end">{{ geoInfo.value }}</ion-note>
+    </ion-item>
+  </ion-list>
 </ion-content>
