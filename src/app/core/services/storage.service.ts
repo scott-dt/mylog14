@@ -5,6 +5,7 @@ import { formatDate } from '@angular/common';
 import { Observable, from, defer, forkJoin, of } from 'rxjs';
 import { map, mergeMap, catchError, switchMap, take, filter } from 'rxjs/operators';
 import { RecordMeta } from '../interfaces/record-meta';
+import { crypto, util } from 'openpgp';
 
 const { Filesystem, Storage } = Plugins;
 
@@ -116,7 +117,17 @@ export class StorageService {
       );
   }
 
-  getFileHash(fileName: string) {
-    return '<file-hash-placeholder>';
+  getFileHash(fileName: string): string {
+    let hashhex = "";
+    Filesystem.readFile({
+      path: fileName,
+      directory: FilesystemDirectory.Data,
+    })
+    .then(result => {
+      const intarr = crypto.hash.sha256(result.data);
+      const hashstr = util.Uint8Array_to_str(intarr);
+      hashhex = util.str_to_hex(hashstr);
+    });
+    return hashhex;
   }
 }
