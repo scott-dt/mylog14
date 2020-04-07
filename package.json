@@ -30,7 +30,7 @@
     "@ionic/pwa-elements": "^1.5.1",
     "@ngx-translate/core": "^12.1.2",
     "@ngx-translate/http-loader": "^4.0.0",
-    "@numbersprotocol/niota": "^0.1.1",
+    "@numbersprotocol/niota": "^0.1.2",
     "bufferutil": "^4.0.1",
     "chart.js": "^2.9.3",
     "core-js": "^2.5.4",
