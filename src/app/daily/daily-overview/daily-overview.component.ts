@@ -3,7 +3,7 @@ import { AnimationItem } from 'lottie-web';
 import { AnimationOptions, } from 'ngx-lottie';
 import { RecordService } from 'src/app/core/services/record.service';
 import { Observable, forkJoin, of } from 'rxjs';
-import { map, mergeMap, filter } from 'rxjs/operators';
+import { map, mergeMap, filter, tap } from 'rxjs/operators';
 import { DailyRecord } from 'src/app/core/interfaces/daily-record';
 
 @Component({
@@ -146,6 +146,7 @@ export class DailyOverviewComponent implements OnInit {
               .map(cardItem => of(cardItem))
           );
         }),
+        tap(cardItems => this.today(cardItems.length)),
       );
   }
 
@@ -160,7 +161,6 @@ export class DailyOverviewComponent implements OnInit {
 
   AC($event) {
     this.animationCreated($event);
-    this.today();
   }
 
   animationCreated(animationItem: AnimationItem) {
@@ -170,8 +170,7 @@ export class DailyOverviewComponent implements OnInit {
     console.log("is animation");
   }
 
-  async today() {
-    const data = this.items.length;
+  async today(data: number) {
     this.ngZone.runOutsideAngular(() => this.animationItem.playSegments(this.arry[data], true))
     await new Promise((resolve) => {
       const timer = setInterval(() => {
