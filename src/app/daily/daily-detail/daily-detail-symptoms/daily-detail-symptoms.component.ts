@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { DailyDetail } from '../daily-detail.page';
 
 @Component({
   selector: 'app-daily-detail-symptoms',
@@ -6,27 +7,13 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./daily-detail-symptoms.component.scss'],
 })
 export class DailyDetailSymptomsComponent implements OnInit {
-  data = {
-    cough: {
-      isShow: true,
-      detail: '5分鐘咳了10次左右'
-    },
-    fever: {
-      isShow: false,
-      detail: '5分鐘咳了10次左右'
+  @Input() dailyDetail: DailyDetail;
+  isShow = true;
+  mockCoughDetail = '5分鐘咳了10次左右';
+  mockFeverDetail = '';
+  mockRunnyNoseDetail = '';
+  mockStuffyNoseDetail = '有點嗅覺失靈';
 
-    },
-    runnyNose: {
-      isShow: false,
-      detail: '5分鐘咳了10次左右'
-
-    },
-    stuffyNose: {
-      isShow: true,
-      detail: '有點嗅覺失靈'
-
-    }
-  };
   cough = false;
   fever = false;
   runnyNose = false;
