@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { PhotoService } from 'src/app/core/services/photo.service';
 import { ModalController,PopoverController } from '@ionic/angular';
 import { CategorizeFinishPage } from './categorize-finish/categorize-finish.page';
-import { CategorizeImgPopoverPage } from './categorize-img-popover/categorize-img-popover/categorize-img-popover.page';
+import { CategorizeImgPopoverPage } from './categorize-img-popover/categorize-img-popover.page';
 
 
 @Component({
@@ -67,7 +67,7 @@ export class CategoryPendingPage implements OnInit, AfterViewInit {
   onLaterClick() {
 
   }
-  async presentPopover(ev: any) {
+  async presentPopover(ev?: any) {
     const popover = await this.popoverController.create({
       component: CategorizeFinishPage,
       event: ev,
@@ -75,15 +75,13 @@ export class CategoryPendingPage implements OnInit, AfterViewInit {
     });
     return await popover.present();
   }
-  async openIMGModal(photo,ev: any) {
-   
-
+  async openIMGModal(photo, ev?: any) {
     const popover = await this.popoverController.create({
       component: CategorizeImgPopoverPage,
       event: ev,
       translucent: true,
       componentProps: {
-        
+
         "paramID": 123,
         "paramTitle": "Test Title",
         "timestamp":photo.snapshot.timestamp,
