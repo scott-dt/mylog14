@@ -4,8 +4,8 @@ import { Plugins, StatusBarStyle } from '@capacitor/core';
 
 import { TranslateConfigService } from './translate-config.service';
 import { StorageService } from './core/services/storage.service';
-import { forkJoin } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { interval } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { GeolocationService } from './core/services/geolocation.service';
 
 const { SplashScreen, StatusBar } = Plugins;
@@ -36,11 +36,12 @@ export class AppComponent {
         console.log('Status Bar is not implemented in web');
       }
     }
-    forkJoin([
-      this.geolocationService.getPosition(),
-    ]).pipe(
-      tap(() => SplashScreen.hide())
-    ).subscribe();
+    // Update location cache every 30 secs after App starts
+    interval(30000)
+    .pipe(
+      switchMap(() => this.geolocationService.getPosition(false)),
+    ).subscribe(() => console.log('Location cache updated'));
+    SplashScreen.hide();
   }
   languageChanged(){
     this.translateConfigService.setLanguage(this.selectedLanguage);

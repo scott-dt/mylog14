@@ -15,7 +15,7 @@ export class GeolocationService {
   constructor() { }
 
   getPosition(useCache = true): Observable<GeolocationPosition> {
-    const position$ = (this.isCachedPositionValid() && useCache) ? of(this.cachedPosition) : from(Geolocation.getCurrentPosition());
+    const position$ = (this.isCachedPositionValid(useCache)) ? of(this.cachedPosition) : from(Geolocation.getCurrentPosition());
     return position$
       .pipe(
         take(1),
@@ -32,7 +32,10 @@ export class GeolocationService {
     return watch(geolocationOptions);
   }
 
-  private isCachedPositionValid(): boolean {
+  private isCachedPositionValid(useCache: boolean): boolean {
+    if (!useCache) {
+      return false;
+    }
     const cached: boolean = !(!this.cachedPosition || !this.cachedPositionTime);
     const isTimeout = (Date.now() - this.cachedPositionTime > this.cacheTimeout);
     console.log('Use cached postion: ', (cached && !isTimeout));
