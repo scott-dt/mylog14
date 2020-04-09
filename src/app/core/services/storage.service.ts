@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Plugins, FilesystemDirectory, FilesystemEncoding } from '@capacitor/core';
 import { Record } from '../interfaces/record';
-import { from, defer, forkJoin, of, BehaviorSubject } from 'rxjs';
-import { map, switchMap, take, tap, catchError } from 'rxjs/operators';
+import { from, defer, forkJoin, of, BehaviorSubject, Observable } from 'rxjs';
+import { map, switchMap, take, tap, catchError, mergeMap } from 'rxjs/operators';
 import { RecordMeta } from '../interfaces/record-meta';
 import { crypto, util } from 'openpgp';
 import { UserData } from '../interfaces/user-data';
@@ -59,14 +59,22 @@ export class StorageService {
       this.saveRecordJSON(record).pipe(take(1)),
       from(Storage.get({ key: this.RECORD_META_REPOSITORY })).pipe(take(1)),
     ]).pipe(
-      map(([fileName, repoRaw]) => {
+      mergeMap(([fileName, repoRaw]) => {
+        return forkJoin([
+          of(fileName),
+          of(repoRaw),
+          this.getFileHash(fileName),
+        ]);
+      }),
+      map(([fileName, repoRaw, fileHash]) => {
         const recordMetaList: RecordMeta[] = (repoRaw.value) ? JSON.parse(repoRaw.value) : [];
         const recordMeta: RecordMeta = {
           timestamp: +fileName.slice(0, -4),
           path: fileName,
           directory: this.RECORD_META_DIRECTORY,
-          hash: this.getFileHash(fileName),
+          hash: fileHash,
         };
+        console.log('recordMeta', recordMeta);
         // Check if a record with the same filename (timestamp) exists
         const oldRecordMeta = recordMetaList.find(r => r.path === fileName);
         // Update or create recordMeta
@@ -113,18 +121,32 @@ export class StorageService {
     })).pipe(tap(() => this.userData.next(userData)));
   }
 
-  getFileHash(fileName: string): string {
-    let hashhex = "";
-    Filesystem.readFile({
+  getFileHash(fileName: string): Observable<string> {
+    return from(Filesystem.readFile({
       path: fileName,
       directory: FilesystemDirectory.Data,
-    })
-    .then(result => {
-      const intarr = crypto.hash.sha256(result.data);
-      const hashstr = util.Uint8Array_to_str(intarr);
-      hashhex = util.str_to_hex(hashstr);
-    });
-    return hashhex;
+    }))
+      .pipe(
+        take(1),
+        map(result => this.strToArrayBuffer(result.data)),
+        tap(ab => console.log('ab', ab)),
+        switchMap(ab => crypto.hash.sha256(ab)),
+        tap(intArr => console.log('intArr', intArr)),
+        map(intArr => util.Uint8Array_to_str(intArr)),
+        tap(hashStr => console.log('hashStr', hashStr)),
+        map(hashStr => util.str_to_hex(hashStr)),
+        tap(hashHex => console.log('hashHex', hashHex)),
+      );
+  }
+
+  private strToArrayBuffer(str: string): ArrayBuffer {
+    console.log('str2ab string', str);
+    const buf = new ArrayBuffer(str.length); // 1 bytes for each char
+    const bufView = new Uint8Array(buf);
+    for (let i = 0; i < str.length; i++) {
+      bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
   }
 
   // Get Record JSON from Filesystem
@@ -163,7 +185,6 @@ export class StorageService {
         .pipe(
           take(1),
           map(fileWriteResult => {
-            console.log('fileWriteResult', fileWriteResult);
             return fileName;
           }),
         )
